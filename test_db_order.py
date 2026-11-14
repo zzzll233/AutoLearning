@@ -79,6 +79,9 @@ def test_order_api_matches_database(db_conn, qa_training_url, api_session, order
 def test_create_order_rejected(
     db_conn, qa_training_url, api_session, order_id, customer_id, amount, order_status, expected_status
     ):
+    '''
+    测试创建订单失败的情况, 检查数据库是否未被修改
+    '''
     before = get_order(db_conn, order_id)
 
     if expected_status == 409:
@@ -107,3 +110,4 @@ def test_create_order_rejected(
         assert response.json()["errno"] == 1452
     after = get_order(db_conn, order_id)
     assert after == before
+
