@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
 from decimal import Decimal, InvalidOperation
-from sqlite3 import IntegrityError
 import mysql.connector
 from flask import Flask, request
 from order_queries import get_order, insert_order
+from time import perf_counter
 
 app = Flask(__name__) # 创建 Flask 应用实例，__name__ 是当前模块的名称
 app.json.ensure_ascii = False
@@ -15,9 +15,18 @@ with open(config_path, encoding="utf-8") as file:
 
 @app.get("/orders/<int:order_id>") # 定义路由，/orders/<order_id> 是动态路由，order_id 是一个整数参数
 def read_order(order_id):
+    start = perf_counter()
     with mysql.connector.connect(**config) as connection:
+        connected = perf_counter()
         order = get_order(connection, order_id)
+        queried = perf_counter()
     
+    print(
+    f"order_id={order_id} "
+    f"db_connect_ms={(connected - start) * 1000:.1f} "
+    f"query_fetch_ms={(queried - connected) * 1000:.1f}"
+)
+
     if order is None:
         return {"message": "Order not found"}, 404
 
@@ -34,11 +43,11 @@ def create_order():
     if not isinstance(data, dict):
         return {"message": "请求体必须是 JSON 对象"}, 400
 
-    order_id = data["order_id"]
-
     for key in ["order_id", "customer_id", "amount", "order_status"]:
         if key not in data:
             return {"message": f"缺少必填字段 {key}"}, 400
+    order_id = data["order_id"]
+    
     try:
         amount = Decimal(str(data["amount"]))
     except InvalidOperation:

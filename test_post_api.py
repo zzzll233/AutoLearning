@@ -1,24 +1,9 @@
-from decimal import Decimal
-from tkinter import N
-
-from flask import after_this_request
 import requests
 import pytest
-from urllib3 import response
 
-from order_queries import get_order
 @pytest.fixture
 def base_url():
     return "https://jsonplaceholder.typicode.com"
-
-@pytest.fixture
-def qa_training_url():
-    return "http://localhost:5051"
-
-@pytest.fixture
-def api_session():
-    with requests.Session() as session:
-        yield session
 
 # 测试获取帖子详情
 @pytest.mark.parametrize("post_id", [1,2])
@@ -35,7 +20,7 @@ def test_get_post_by_id(post_id, base_url, api_session):
 
 # 测试获取用户帖子
 @pytest.mark.parametrize("user_id, expected_has_posts", [(1, True),(999, False)])
-def test_get_posts_by_user_id(user_id, expected_has_posts, base_url):
+def test_get_posts_by_user_id(user_id, expected_has_posts, base_url, api_session):
     response = api_session.get(
         f"{base_url}/posts",
         params = {"userId": user_id},
