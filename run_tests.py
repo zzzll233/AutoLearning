@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 from datetime import datetime
+import json
 
 # 检查环境 → 运行 pytest → 保存本次报告 → 打印摘要。
 
@@ -41,6 +42,17 @@ if xml_report.is_file():
                                 cwd=project_dir)
     if test_results.returncode != 0:
         print("报告摘要生成失败")
+
+run_info = {
+    "mode": args.mode, # 测试模式
+    "finished_at": datetime.now().isoformat(timespec="seconds"), # 结束时间, 格式为 ISO-MM-DDTHH:MM:SS.SSS
+    "exit_code": result.returncode, # 测试退出码
+    "xml_report": xml_report.name if xml_report.is_file() else None, # XML 报告路径
+    "html_report": html_report.name if html_report.is_file() else None, # HTML 报告路径
+}
+
+with (report_dir / "run.json").open("w", encoding="utf-8") as file:  # 写入运行信息到 JSON 文件
+    json.dump(run_info, file, ensure_ascii=False, indent=2)
 
 raise SystemExit(result.returncode)
 
