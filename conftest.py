@@ -5,9 +5,11 @@ import pytest
 import requests
 import mysql.connector
 
+from qa_settings import QA_BASE_URL
+
 @pytest.fixture
 def qa_training_url():
-    return "http://127.0.0.1:5051"
+    return QA_BASE_URL
 
 @pytest.fixture
 def api_session():

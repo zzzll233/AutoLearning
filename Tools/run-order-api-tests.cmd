@@ -18,28 +18,22 @@ if not exist "%PYTHON_EXE%" (
     exit /b 1
 )
 
-set "TEST_TARGET="
+set "RUN_MODE="
 choice /c 12 /n /m "1 = Quick check, 2 = Full regression: "
-set "MODE=%ERRORLEVEL%"
+set "MENU_CHOICE=%ERRORLEVEL%"
 
-if "%MODE%"=="1" set "TEST_TARGET=test_db_order.py::test_order_api_matches_database"
-if "%MODE%"=="2" set "TEST_TARGET=test_db_order.py"
+if "%MENU_CHOICE%"=="1" set "RUN_MODE=quick"
+if "%MENU_CHOICE%"=="2" set "RUN_MODE=full"
 
-if not defined TEST_TARGET (
+if not defined RUN_MODE (
     popd
     exit /b 2
 )
 
-echo Running order lookup tests. Flask on port 5051 and MySQL must be running.
-"%PYTHON_EXE%" -m pytest -v "%TEST_TARGET%" --junitxml="%REPORT%" --html=reports/order-api.html --self-contained-html
-set "TEST_EXIT=%ERRORLEVEL%"
-if exist "%REPORT%" (
-    "%PYTHON_EXE%" summarize_results.py "%REPORT%"
-)
+"%PYTHON_EXE%" run_tests.py "%RUN_MODE%"
+set "RUN_EXIT=%ERRORLEVEL%"
 
-echo(
-echo pytest exit code: %TEST_EXIT%
-echo Report location: "%CD%\%REPORT%"
+echo Runner exit code: %RUN_EXIT%
 popd
 pause
-exit /b %TEST_EXIT%
+exit /b %RUN_EXIT%
