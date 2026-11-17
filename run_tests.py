@@ -22,7 +22,7 @@ project_dir = Path(__file__).resolve().parent
 check = subprocess.run([sys.executable, "check_environment.py"], 
                         cwd=project_dir) # 检查环境
 if check.returncode != 0: # 如果环境检查失败, 则退出程序
-    raise SystemExit(check.returncode)
+    raise SystemExit(10)
 
 run_time = datetime.now().strftime("%Y%m%d_%H%M%S-%f") # 获取当前时间, 格式为 YYYYMMDD_HHMMSS-ffffff
 report_dir = project_dir / "reports" / f"order-api_{run_time}" # 构建报告路径
